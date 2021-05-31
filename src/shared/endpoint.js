@@ -1,0 +1,1 @@
+export const DELIVERY_API = '/v2/deliveries';

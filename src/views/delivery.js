@@ -12,28 +12,26 @@ import {
     Text, 
     Alert, FlatList, InteractionManager,
 } from 'react-native';
-import {GET_SERVICE} from "../shared/backend";
+import {connect} from 'react-redux';
+import {fetchDelivery,deliveryDetails} from '../redux/actions/deliveryAction'
 import {CustomLoader} from "../shared/activityindicator";
 import {SAVE_DELIVERY} from '../shared/storage'
 const NumberFormat = require('react-number-format');
 import AntDesign from 'react-native-vector-icons/dist/AntDesign';
 
-export default class DeliveryScreen extends Component {
-    state = {
-        deliveryList: [],
-        loading: false 
-    }
+class DeliveryScreen extends Component {
+ 
 
     async componentDidMount()
     {
-        await this.getDelivery();
+      console.log('bbbb',await this.props.fetchDelivery());
     }
 
     header= () => {
         return(
           <View style={{height: 60, width: Dimensions.get('screen').width,backgroundColor:'#26CB2E',justifyContent:'center' }} >
           <View style={{flex:1}}>
-<View >
+         <View >
               <View style={{ flexDirection:'row',paddingTop:15,paddingHorizontal:20 }}>
               <TouchableOpacity onPress={() => this.props.navigation.navigate('Swiper')} >
                  <AntDesign name='arrowleft' size={30} color='white' style={{}}/> 
@@ -45,62 +43,31 @@ export default class DeliveryScreen extends Component {
         
         </View>
          </View> 
-         <CustomLoader visible={this.state.loading}/>
+         {/* <CustomLoader visible={this.state.loading}/> */}
          
         
       </View>)
       }
 
-    async getDelivery () {   
-        this.setState({loading: true});
-        const endpoint = '/v2/deliveries'; 
-        try {    
-            const response = await GET_SERVICE(endpoint);
-            this.setState({loading: false});
-            if(response.status===200)
-            { 
-                console.log('response', response.data);
-                this.setState({deliveryList: response.data})
-                } 
-            else
-            {
-                InteractionManager.runAfterInteractions(() => {
-                    setTimeout(() => {
-                        Alert.alert('Error Occurred', response.data.message);
-                    });
-                });
-            }
-        } catch (e) {
-            InteractionManager.runAfterInteractions(() => {
-                setTimeout(() => {
-                    Alert.alert('Error Occurred', "An error has occurred. Kindly check your internet connection.");
-                });
-            });
-        }
-    };
+  
 
-
-
-    goDeliveryDetails(item){
-    //save data in local storage
-      SAVE_DELIVERY(item);
-        console.log('my items index',item)
-        this.props.navigation.navigate('Details',{
-          deliveryData:{
-            loanInstances:[item]
-          }
-      })
+      goToDeliveryDetails(data){
+      //    SAVE_DELIVERY(item);
+      this.props.navigation.navigate('Details');
+      this.props.deliveryDetails(data)
+      //     deliveryData:{
+      //       loanInstances:[item]
+      //     }
+      // })
       }
 
 
 
 
-    _renderItem(item, index,) {
- 
-        console.log('data', item);
+     _renderItem(item, index,) {
+        // console.log('data', item);
              return (  
-           
-            <TouchableOpacity onPress= {()=>this.goDeliveryDetails(item)} style={{marginTop:0, backgroundColor: 'white', borderTopLeftRadius:5, borderTopRightRadius:5,borderBottomColor:'#f8f8f8',borderBottomWidth:1}}>
+            <TouchableOpacity onPress= {()=>this.goToDeliveryDetails(item)} style={{marginTop:0, backgroundColor: 'white', borderTopLeftRadius:5, borderTopRightRadius:5,borderBottomColor:'#f8f8f8',borderBottomWidth:1}}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', marginStart: 15,paddingRight:20}}>
                 <View  style={{flexDirection: 'row'}}> 
                  <View  style={{paddingTop:10}} >
@@ -126,9 +93,9 @@ export default class DeliveryScreen extends Component {
                  <View style={{justifyContent:'center'}}>
                  <NumberFormat renderText={text => <Text style={{color:'#3F3F3F',fontSize:16,lineHeight:17,paddingTop:10}}>{item.deliveryFee}</Text>} value='6700' displayType={'text'} thousandSeparator={true} prefix={'₦'} /> 
                  </View>
-                 <CustomLoader visible={this.state.loading}/>
+             {/* <CustomLoader visible={this.props.loading}/> */}
             </View> 
-           
+         
             </TouchableOpacity>
         );
     }
@@ -139,15 +106,20 @@ export default class DeliveryScreen extends Component {
             <View style={{flex:1}}>
                 <FlatList
                     extraData={this.state}
-                    data={this.state.deliveryList}
+                    data={this.props.item}
                     renderItem={({item, index,}) => this._renderItem(item, index)}
                     keyExtractor={(item, index) => index.toString()}
                     ListHeaderComponent={this.header}
                     stickyHeaderIndices={[0]}
-                    // ItemSeparatorComponent={Divider}
-                />
+                  
+                /> 
             </View>
             
         );
       }
 }
+
+const mapStateToProps=state=>({
+    item: state.delivery.item,
+})
+export default connect(mapStateToProps,{fetchDelivery,deliveryDetails})(DeliveryScreen)

@@ -2,12 +2,10 @@
 import 'react-native-gesture-handler'
 import React from 'react';
 import { StatusBar, View, SafeAreaView, Platform,BackHandler, Alert,Text  } from 'react-native';
-// import { DARK_PRIMARY_COLOR, PRIMARY_COLOR } from './src/shared/colors';
-// import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import Page from './src/routes';  
-// import SwiperScreen from './src/views/swiper';
-// import DeliveryScreen from './src/views/delivery'
-// import DetailsScreen from './src/views/details';
+import store from './store'
+import { Provider } from 'react-redux';
+
 export default class App extends React.Component {
 
   constructor(properties) {
@@ -26,18 +24,6 @@ export default class App extends React.Component {
       return true;
     };
  
-
-
-  // statusBarIOS() {
-  //     if (Platform.OS === 'ios') {
-  //         return <View style={{ backgroundColor: PRIMARY_COLOR, height: 22 }} />
-  //     }
-
-  //     return null
-  // }
-
-
-
   componentDidMount() {
       this.backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -50,21 +36,18 @@ export default class App extends React.Component {
     }
 
   render() {
+   
       return (
+        <Provider store={store}>
          <View style={{ flex: 1 }}>
-             {/* {this.statusBarIOS()} */}
-                      <SafeAreaView style={{ flex: 1 }}>
-                          <StatusBar backgroundColor='green' barStyle={'light-content'} />
-                       
-                                 <Page/>   
-                               {/* <SwiperScreen/> */}
-                      {/* <DeliveryScreen/> */}
-                      {/* <DetailsScreen/> */}
-                      </SafeAreaView>
-                  </View>
-           
+          <SafeAreaView style={{ flex: 1 }}>
+           <StatusBar backgroundColor='green' barStyle={'light-content'} />
+           <Page/>   
+          </SafeAreaView>
+         </View>
+        </Provider>
       );
   } 
 }
 
-console.disableYellowBox = true;
+// console.disableYellowBox = true;
